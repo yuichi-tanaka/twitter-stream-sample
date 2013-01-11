@@ -10,6 +10,7 @@
     "ejs": "*",
     "stylus": "*",
     "mocha" : "*",
-    "should" : "*"
+    "should" : "*",
+    "ntwitter" : "0.5.0"
   }
 }
