@@ -1,5 +1,6 @@
 var ev = require('events').EventEmitter
   , ntwitter = require('ntwitter')
+  , http = require('http')
   , twitter_config = require('../config/twitter')
   ;
 
@@ -12,7 +13,11 @@ var ev = require('events').EventEmitter
 	this.message_count = 0;
   }
 
+  // このメソッドはTwitterのStreamAPIの取得を開始します。
+  // 引数に取得したいハッシュタグ、callbackの関数リストを受け取ります
+  // callbackはdata,end,destroyの名称のjson形式で渡せます。
   var start = function(hashtags,fncs){
+	  console.log('----- event start -------');
 	 var twitter = new ntwitter({
 		 consumer_key : twitter_config.consumer_key
 		 ,consumer_secret: twitter_config.consumer_secret
@@ -20,16 +25,13 @@ var ev = require('events').EventEmitter
 		 ,access_token_secret: twitter_config.access_token_secret
 	 
 	 });
-	 var filter_keyword = _parse_hash_tag(hashtags);
+	 var filter_keyword = (_parse_hash_tag(hashtags)).substr(1);
 	 this._set_filters(hashtags);
+	 var _f = function(data){fncs.data(data);};
 	 twitter.stream('statuses/filter',{'track': filter_keyword},function(stream){
 		console.log('----------------connection start ----------------------');
-		if(typeof fncs.data === 'function') _added_to_data_event(stream,(function(self){
-			return function(data){
-				self._add_message_count();
-				fncs.data(data);
-			};
-		})(this));
+		console.log('----------------keys  =  ' + filter_keyword);
+		if(typeof fncs.data === 'function') _added_to_data_event(stream,_f);
 		if(typeof fncs.destroy === 'function') _added_to_destroy_event(stream,fncs.destroy);
 		if(typeof fncs.end === 'function') _added_to_end_event(stream,fncs.end);
 
@@ -40,7 +42,7 @@ var ev = require('events').EventEmitter
   	if(!hashtags || (hashtags.length <= 0)) return '';
 	var tags_string = '';
 	for(var i = 0; i<hashtags.length;i++){
-		tags_string = ',' + hashtags[i];
+		tags_string += ',' + hashtags[i];
 	}
 	return tags_string;
   }
