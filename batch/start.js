@@ -1,9 +1,9 @@
 var twitter = require('../models/twitter_data')
+  , tweet = require('../models/tweet')
   , mecab_parser = require('../models/parse_mecab')
   , term = require('../models/term')
   ;
 
-   var ins = new term();
   // ins.create_new_term('hoge',function(status,id){
 	  // console.log('id = ' + id);
   
@@ -16,12 +16,16 @@ var twitter = require('../models/twitter_data')
   // mecabを使用してTwitterから取得したつぶやきを形態素解析する
   var mecab_parse_object = new mecab_parser();
   var mecab_parse_function = function(err,res){
-	  ins.create_new_terms(res,function(status,id){
+	  console.log(res.length);
+	  var ins = new term();
+	  ins.on('create_finish',function(status){
+		  console.log('evnet ?');
 		  if(status === 'ok'){
-			  console.log('new term id = ' + id );
+			  console.log('create finish ');
 		  }
 	  });
-  
+	  console.log('type == ' + res[0][1]);
+	  ins.create_new_terms(res);
   }
 
   // TwitterAPIのからのデータを受け付ける
